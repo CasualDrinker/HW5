@@ -1,7 +1,7 @@
 /******************************************************************
  *
  *   YOUR NAME / SECTION NUMBER
- *
+ *	Richard Choi / Comp 272
  *   Note, additional comments provided throughout this source code
  *   is for educational purposes
  *
@@ -48,7 +48,7 @@ import java.lang.Math;
 
 @SuppressWarnings("unchecked")
 public class CuckooHash<K, V> {
-  
+
 	private int CAPACITY;  					// Hashmap capacity
 	private Bucket<K, V>[] table;			// Hashmap table
 	private int a = 37, b = 17;				// Constants used in h2(key)
@@ -58,7 +58,7 @@ public class CuckooHash<K, V> {
 	 * Class Bucket
 	 *
 	 * Inner bucket class which represents a <key,value> pair 
-     * within the hash map.
+	 * within the hash map.
 	 *
 	 * @param <K> - type of key
 	 * @param <V> - type of value
@@ -67,9 +67,9 @@ public class CuckooHash<K, V> {
 	private class Bucket<K, V> {
 		private K bucKey = null;
 		private V value = null;
-		
+
 		public Bucket(K k, V v) {
-			bucKey = k; 
+			bucKey = k;
 			value = v;
 		}
 
@@ -95,9 +95,9 @@ public class CuckooHash<K, V> {
 	 * Method CuckooHash
 	 *
 	 * Constructor that initializes and sets the hashmap. A future 
-     * optimization would to pass a load factor limit as a target in
-     * maintaining the hashmap before reaching the point where we have
-     * a cycle causing occurring loop.
+	 * optimization would to pass a load factor limit as a target in
+	 * maintaining the hashmap before reaching the point where we have
+	 * a cycle causing occurring loop.
 	 *
 	 * @param size user input multimap capacity
 	 */
@@ -105,7 +105,7 @@ public class CuckooHash<K, V> {
 	public CuckooHash(int size) {
 		CAPACITY = size;
 		table = new Bucket[CAPACITY];
-	}						  
+	}
 
 
 	/**
@@ -120,7 +120,7 @@ public class CuckooHash<K, V> {
 		int count = 0;
 		for (int i=0; i<CAPACITY; ++i) {
 			if (table[i] != null)
-				count++; 	
+				count++;
 		}
 		return count;
 	}
@@ -130,12 +130,12 @@ public class CuckooHash<K, V> {
 	 * Method clear
 	 *
 	 * Removes all elements in the table, it does not rest the size of 
-     * the hashmap. Optionally, we could reset the CAPACITY to its
-     * initial value when the object was instantiated.
+	 * the hashmap. Optionally, we could reset the CAPACITY to its
+	 * initial value when the object was instantiated.
 	 */
 
 	public void clear() {
-		table = new Bucket[CAPACITY]; 
+		table = new Bucket[CAPACITY];
 	}
 
 	public int mapSize() { return CAPACITY; }    // used in external testing only
@@ -150,7 +150,7 @@ public class CuckooHash<K, V> {
 	 */
 
 	public List<V> values() {
-		List<V> allValues = new ArrayList<V>(); 
+		List<V> allValues = new ArrayList<V>();
 		for (int i=0; i<CAPACITY; ++i) {
 			if (table[i] != null) {
 				allValues.add(table[i].getValue());
@@ -183,12 +183,12 @@ public class CuckooHash<K, V> {
 	 * Method put
 	 *
 	 * Adds a key-value pair to the table by means of cuckoo hashing. 
-     * Each element can only be inserted into one of two bucket locations,
-     * defined by the two separate hash functions, h1(key) or h2(key).
+	 * Each element can only be inserted into one of two bucket locations,
+	 * defined by the two separate hash functions, h1(key) or h2(key).
 	 * Each element's initial location will always be defined
 	 * by h1(key). If later it is kicked out of that bucket location by 
-     * another element insertion, it will move back and forth between those
-     *  two hash locations (aka, bucket locations).
+	 * another element insertion, it will move back and forth between those
+	 *  two hash locations (aka, bucket locations).
 	 *
 	 * On its initial invocation, this method places the passed <key,value>
 	 * element at its h1(key) bucket location. If an element is already located
@@ -199,15 +199,15 @@ public class CuckooHash<K, V> {
 	 * to the alternate location.
 	 *
 	 * This process will continue in a loop as it moves kicked out 
-     * elements to their alternate location (defined by h1(key) and h2(key))
-     * until either:
+	 * elements to their alternate location (defined by h1(key) and h2(key))
+	 * until either:
 	 *         (1) an empty bucket is found, or
 	 *         (2) we reach 'n' iterations, where 'n' is the bucket capacity
 	 *             of the hashmap (see HINT below on this method of cycle
 	 *             detection, the bucket capacity is held in variable 'CAPACITY').
 	 *
 	 * If we reach 'n' shuffles of elements being kicked out and moved to their
-     * secondary locations (leading to what appears to be a cycle), we will grow
+	 * secondary locations (leading to what appears to be a cycle), we will grow
 	 * the hashmap and rehash (via method rehash()). After the rehash, we will
 	 * need to re-invoke this method recursively, as we will have one element that
 	 * was kicked out after the 'n' iteration that still needs to be inserted. Note,
@@ -241,28 +241,61 @@ public class CuckooHash<K, V> {
 	 * discussed graphs yet, they are at the end of the semester :-)
 	 *
 	 * @param key the key of the element to add
-     * @param value the value of the element to add
+	 * @param value the value of the element to add
 	 */
 
- 	public void put(K key, V value) {
+	public void put(K key, V value) {
+		// If the key-value pair already exists in the table, do nothing
+		int pos1 = hash1(key);
+		int pos2 = hash2(key);
 
-		// ADD YOUR CODE HERE - DO NOT FORGET TO ADD YOUR NAME AT TOP OF FILE.
-		// Also make sure you read this method's prologue above, it should help
-		// you. Especially the two HINTS in the prologue.
+		if ((table[pos1] != null && table[pos1].getBucKey().equals(key) && table[pos1].getValue().equals(value)) ||
+				(table[pos2] != null && table[pos2].getBucKey().equals(key) && table[pos2].getValue().equals(value))) {
+			return;
+		}
 
-		return;
+		Bucket<K, V> newBucket = new Bucket<>(key, value);
+		int maxIterations = CAPACITY;
+
+		for (int i = 0; i < maxIterations; i++) {
+			if (table[pos1] == null) {
+				table[pos1] = newBucket;
+				return;
+			}
+
+			// Kick out the existing element at pos1
+			Bucket<K, V> kickedOutBucket = table[pos1];
+			table[pos1] = newBucket;
+
+			// Now try to place the kicked out bucket in its alternate location
+			newBucket = kickedOutBucket;
+			pos1 = (pos1 == hash1(newBucket.getBucKey())) ? hash2(newBucket.getBucKey()) : hash1(newBucket.getBucKey());
+
+			if (table[pos1] == null) {
+				table[pos1] = newBucket;
+				return;
+			}
+		}
+
+		// If we reach here, we've cycled through the capacity without finding a spot.
+		// Cycle detected: Rehash and try again.
+		rehash();
+		put(newBucket.getBucKey(), newBucket.getValue());
 	}
 
 
+
+
+
 	/**
-	 * Method get
-	 *
-	 * Retrieve a value in O(1) time based on the key because it can only 
-     * be in 1 of 2 locations
-	 *
-	 * @param key Key to search for
-	 * @return the found value or null if it doesn't exist
-	 */
+             * Method get
+             *
+             * Retrieve a value in O(1) time based on the key because it can only
+             * be in 1 of 2 locations
+             *
+             * @param key Key to search for
+             * @return the found value or null if it doesn't exist
+             */
 
 	public V get(K key) {
 		int pos1 = hash1(key);
@@ -278,8 +311,8 @@ public class CuckooHash<K, V> {
 	/**
 	 * Method remove
 	 *
-	 * Removes this key value pair from the table. Its time complexity 
-     * is O(1) because the key can only be in 1 of 2 locations.
+	 * Removes this key value pair from the table. Its time complexity
+	 * is O(1) because the key can only be in 1 of 2 locations.
 	 *
 	 * @param key the key to remove
 	 * @param value the value to remove
@@ -303,8 +336,8 @@ public class CuckooHash<K, V> {
 	/**
 	 * Method printTable
 	 *
-	 * The method will prepare a String representation of the table of 
-     * the format
+	 * The method will prepare a String representation of the table of
+	 * the format
 	 *      [ <k1, v1> <k2. v2> ... <kn, vn> ]
 	 * where n is the number of <key, value> pairs.
 	 *
@@ -331,12 +364,12 @@ public class CuckooHash<K, V> {
 	/**
 	 * Method rehash
 	 *
-	 * This method regrows the hashtable to capacity: 2*old capacity + 1 
-     * and reinserts (rehashes) all the <key,value> pairs.
+	 * This method regrows the hashtable to capacity: 2*old capacity + 1
+	 * and reinserts (rehashes) all the <key,value> pairs.
 	 *
-	 * This method invokes the 'put' method, so it is possible that 
-     * another cycle is found when rehashing the hashmap. If this occurs,
-     * this function can be invoked recursively via the 'put' method.
+	 * This method invokes the 'put' method, so it is possible that
+	 * another cycle is found when rehashing the hashmap. If this occurs,
+	 * this function can be invoked recursively via the 'put' method.
 	 */
 
 	private void rehash() {
@@ -353,4 +386,3 @@ public class CuckooHash<K, V> {
 	}
 
 }
-
